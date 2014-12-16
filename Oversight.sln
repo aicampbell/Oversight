@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Oversight", "Oversight\Oversight.csproj", "{4DDC7A11-6854-45C0-829C-74019FFD2483}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Oversight.Tests", "Oversight.Tests\Oversight.Tests.csproj", "{A9AA17E5-359B-4882-9E3B-2B30DBA0343A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4DDC7A11-6854-45C0-829C-74019FFD2483}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DDC7A11-6854-45C0-829C-74019FFD2483}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DDC7A11-6854-45C0-829C-74019FFD2483}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DDC7A11-6854-45C0-829C-74019FFD2483}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9AA17E5-359B-4882-9E3B-2B30DBA0343A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9AA17E5-359B-4882-9E3B-2B30DBA0343A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9AA17E5-359B-4882-9E3B-2B30DBA0343A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9AA17E5-359B-4882-9E3B-2B30DBA0343A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
