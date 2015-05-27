@@ -164,20 +164,42 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="Models\BurndownChartData.cs" />
+    <Compile Include="Models\ChartData.cs" />
+    <Compile Include="Models\Dashboard.cs" />
+    <Compile Include="Models\DTO\Assignee.cs" />
+    <Compile Include="Models\DTO\AvatarUrls.cs" />
+    <Compile Include="Models\DTO\Column.cs" />
+    <Compile Include="Models\DTO\ColumnData.cs" />
+    <Compile Include="Models\DTO\Fields.cs" />
+    <Compile Include="Models\DTO\Issue.cs" />
+    <Compile Include="Models\DTO\IssueKey.cs" />
+    <Compile Include="Models\DTO\Iteration.cs" />
+    <Compile Include="Models\DTO\Project.cs" />
+    <Compile Include="Models\DTO\SearchRequest.cs" />
+    <Compile Include="Models\DTO\SearchResponse.cs" />
+    <Compile Include="Models\DTO\Status.cs" />
+    <Compile Include="Models\DTO\Task.cs" />
+    <Compile Include="Models\DTO\Test.cs" />
     <Compile Include="Models\IdentityModels.cs" />
+    <Compile Include="Models\JiraClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap.css" />
     <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\Images\arrow-right.png" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
+    <Content Include="Scripts\amcharts.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
+    <Content Include="Scripts\chart.js" />
+    <Content Include="Scripts\index.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
@@ -186,8 +208,11 @@
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
     <Content Include="Scripts\modernizr-2.6.2.js" />
+    <Content Include="Scripts\none.js" />
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
+    <Content Include="Scripts\serial.js" />
+    <Content Include="Scripts\stackedchart.js" />
     <Content Include="Scripts\_references.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">

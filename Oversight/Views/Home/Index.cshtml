@@ -1,31 +1,388 @@
-﻿@{
+﻿@using System.Web.Configuration
+@using System.Web.Script.Serialization
+@using System.Web.UI.WebControls
+@using Newtonsoft.Json
+@using Oversight.Models.DTO
+@using Microsoft.Ajax.Utilities
+@model Oversight.Models.Dashboard
+@using Oversight.Models
+@{
     ViewBag.Title = "Home Page";
 }
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+<script src="~/Scripts/chart.js"></script>
+<script src="~/Scripts/amcharts.js"></script>
+<script src="~/Scripts/serial.js"></script>
+<script src="~/Scripts/none.js"></script>
 
-<div class="jumbotron">
-    <h1>ASP.NET</h1>
-    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
-    <p><a href="http://asp.net" class="btn btn-primary btn-large">Learn more &raquo;</a></p>
-</div>
 
-<div class="row">
-    <div class="col-md-4">
-        <h2>Getting started</h2>
-        <p>
-            ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
-            enables a clean separation of concerns and gives you full control over markup
-            for enjoyable, agile development.
-        </p>
-        <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a></p>
+<div id="Container">
+    <div class="col-md-20" id="update">
+        <strong>Latest Updates</strong>
+        @{ int i = 0; }
+        @foreach (Issue t in Model.CurrentIssues)
+        {
+            if (i >= 7)
+            {
+                break;
+            }
+            if (((t.LastUpdated.Minutes < 1) && (t.LastUpdated.Hours < 1) && (t.LastUpdated.Days < 1)))
+            {
+                <div style="border-left: thin solid #ff0000;">
+                    <div id="Moved-To" style="margin-bottom:0.5em">
+                        <strong>Moved To:</strong> @t.Fields.Status.Name <br />
+                    </div>
+                    <div id="Id" style="margin-bottom:1em">
+                        <strong>Ticket ID: </strong>@t.Key
+                    </div>
+
+                    <div style="margin-bottom: 0.5em; margin-top: 0.5em">
+                        <strong>Ticket Summary:</strong> @t.Fields.Summary
+                    </div>
+                    <div>
+
+                    </div>
+                    <div style="text-align:right">
+                        <strong>Last Updated:</strong>  @t.LastUpdated.Seconds seconds ago
+                    </div>
+
+                    <br />
+                    <div class="hr"><hr /></div>
+                </div>
+
+            }
+            else if ((t.LastUpdated.Hours < 1) && (t.LastUpdated.Days < 1))
+            {
+                <div style="border-left: thin solid #ff0000;">
+                    <div id="Moved-To" style="margin-bottom:0.5em">
+                        <strong>Moved To:</strong> @t.Fields.Status.Name <br />
+                    </div>
+                    <div id="Id" style="margin-bottom:1em">
+                        <strong>Ticket ID: </strong>@t.Key
+                    </div>
+
+                    <div style="margin-bottom: 0.5em; margin-top: 0.5em">
+                        <strong>Ticket Summary:</strong> @t.Fields.Summary
+                    </div>
+                    <div>
+
+                    </div>
+                    <div style="text-align:right">
+                        <strong>Last Updated:</strong>  @t.LastUpdated.Minutes minutes ago
+                    </div>
+
+                    <br />
+                    <div class="hr"><hr /></div>
+                </div>
+
+            }
+            else if ((t.LastUpdated.Days < 1) && (t.LastUpdated.Hours >= 1))
+            {
+                <div style="border-left: thin solid #ff0000;">
+                    <div id="Moved-To" style="margin-bottom:0.5em">
+                        <strong>Moved To:</strong> @t.Fields.Status.Name <br />
+                    </div>
+                    <div id="Id" style="margin-bottom:1em">
+                        <strong>Ticket ID: </strong>@t.Key
+                    </div>
+
+                    <div style="margin-bottom: 0.5em; margin-top: 0.5em">
+                        <strong>Ticket Summary:</strong> @t.Fields.Summary
+                    </div>
+                    <div>
+
+                    </div>
+                    <div style="text-align:right">
+                        <strong>Last Updated:</strong>  @t.LastUpdated.Hours hours ago
+                    </div>
+
+                    <br />
+                    <div class="hr"><hr /></div>
+                </div>
+            }
+            else if (t.LastUpdated.Days >= 1)
+            {
+                <div style="border-left: thin solid #ff0000;">
+                    <div id="Moved-To" style="margin-bottom:0.5em">
+                        <strong>Moved To:</strong> @t.Fields.Status.Name <br />
+                    </div>
+                    <div id="Id" style="margin-bottom:1em">
+                        <strong>Ticket ID: </strong>@t.Key
+                    </div>
+
+                    <div style="margin-bottom: 0.5em; margin-top: 0.5em">
+                        <strong>Ticket Summary:</strong> @t.Fields.Summary
+                    </div>
+                    <div>
+
+                    </div>
+                    <div style="text-align:right">
+                        <strong>Last Updated:</strong>  @t.LastUpdated.Days Days ago
+                    </div>
+
+                    <br />
+                    <div class="hr"><hr /></div>
+                </div>
+
+            }
+            i++;
+
+        }
     </div>
-    <div class="col-md-4">
-        <h2>Get more libraries</h2>
-        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
-        <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a></p>
+
+    <div style="text-align:center; font-size:28px; color:#ffffff">Burndown Chart for @Model.sprintDetails.name</div>
+  @{
+        Model.BurndownChatData = new List<BurndownChartData>();
+        DateTime startDate =Convert.ToDateTime(Model.sprintDetails.startDate);
+        DateTime endDate = Convert.ToDateTime(Model.sprintDetails.endDate);
+        DateTime date;
+        double daysBetweenDates = (endDate - startDate).TotalDays;
+        int totalStoryPoints = 0;
+        foreach (Issue issue in Model.CurrentIssues)
+        {
+            totalStoryPoints += issue.Fields.StoryPoints.AsInt();
+        }
+        double idealStoryPoints = totalStoryPoints;
+        double idealVelocity = totalStoryPoints / daysBetweenDates;
+        
+
+        int completedStoryPoints = 0;
+        
+
+        int xValue;
+
+        for (date = startDate, xValue = 0; date.Date <= endDate.Date; date = date.AddDays(1))
+        {
+            int actualStoryPoints = totalStoryPoints - completedStoryPoints;
+            foreach (Issue issue in Model.CurrentIssues)
+            {
+                if (date.Date.Equals(issue.Fields.Date.Date) && (Model.ColumnNames.Last().statusIds.Contains(issue.Fields.Status.Id.ToString())))
+                {
+                    completedStoryPoints += Convert.ToInt32(issue.Fields.StoryPoints);
+                    
+                }
+                if (date.Date > DateTime.Now.Date) {
+                    actualStoryPoints = 0;
+                }
+            }
+
+            Model.BurndownChatData.Add(new BurndownChartData(date, actualStoryPoints, ((-idealVelocity * xValue) + totalStoryPoints)));
+            
+            xValue++;
+        }
+        
+      }
+    @{
+    var output = Html.Raw(Json.Encode(Model.BurndownChatData));
+    <div hidden id="json">@output</div>
+}
+      <div  id="chartdiv"></div>
+
+    <script type="text/javascript">
+        
+        var chartData = $.parseJSON($("#json").html());
+
+       var chart = AmCharts.makeChart("chartdiv", {
+            type: "serial",
+            dataDateFormat: "YYYY-MM-DD",
+            dataProvider: chartData,
+
+            addClassNames: true,
+            startDuration: 1,
+            color: "#FFFFFF",
+            marginLeft: 0,
+
+            categoryField: "date",
+            categoryAxis: {
+                parseDates: true,
+                minPeriod: "DD",
+                autoGridCount: false,
+                gridCount: 50,
+                gridAlpha: 0.1,
+                gridColor: "#FFFFFF",
+                axisColor: "#555555",
+                dateFormats: [{
+                    period: 'DD',
+                    format: 'DD'
+                }, {
+                    period: 'WW',
+                    format: 'MMM DD'
+                }, {
+                    period: 'MM',
+                    format: 'MMM'
+                }, {
+                    period: 'YYYY',
+                    format: 'YYYY'
+                }]
+            },
+
+            valueAxes: [{
+                id: "a1",
+                title: "Story Points",
+                gridAlpha: 0,
+                axisAlpha: 0
+            }],
+            graphs: [{
+                id: "g1",
+                valueField: "actualStoryPoints",
+                title: "actualStoryPoints",
+                type: "column",
+                fillAlphas: 0.9,
+                valueAxis: "a1",
+                lineColor: "#27a9e0",
+                alphaField: "alpha",
+            }, {
+                id: "g3",
+                title: "idealStoryPoints",
+                valueField: "idealStoryPoints",
+                type: "line",
+                valueAxis: "a3",
+                lineColor: "#ff5755",
+                lineThickness: 2,
+                bulletBorderColor: "#ff5755",
+                bulletBorderThickness: 1,
+                bulletBorderAlpha: 1,
+                dashLengthField: "dashLength",
+
+            }],
+
+
+        }
+ );
+      </script>
+    
+
+    <div id="column-table">
+        <table class="table col-md-12">
+            <thead>
+                <tr>
+                    @foreach (Column c in @Model.ColumnNames)
+                    {
+                        <th style="border-bottom-color: @c.colour">@c.name</th>
+                    }
+                </tr>
+
+            </thead>
+            <tbody>
+                <tr>
+                    @foreach (int numberOfIssues in Model.NumberOfIssuesInEachColumn)
+                    {
+                        <td>@numberOfIssues</td>
+                    }
+                </tr>
+            </tbody>
+        </table>
     </div>
-    <div class="col-md-4">
-        <h2>Web Hosting</h2>
-        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
-        <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a></p>
-    </div>
-</div>
+
+    <div style="overflow:hidden">
+        <div class="doughnut-chart col-md-4 container-square" style=" padding-bottom: 1000px; margin-bottom:-1000px;">
+
+            <div class="charts col-md-7" id="canvas-holder">
+                @{
+
+                    var values = new List<ChartData>();
+                    int counter = 0;
+                    foreach (Column c in Model.ColumnNames)
+                    {
+                        values.Add(new ChartData(Model.NumberOfIssuesInEachColumn[counter], c.colour, c.colour, c.name));
+                        counter++;
+                    }
+                   
+                }
+               
+                <script type="text/javascript">
+
+                    var doughnutData = @Html.Raw(new JavaScriptSerializer().Serialize(values))
+
+
+                    window.onload = function () {
+                        var ctx = document.getElementById("chart-area").getContext("2d");
+
+                        window.myDoughnut = new Chart(ctx).Doughnut(doughnutData, { responsive: true });
+                    };
+                </script>
+
+
+                <div style="font-size: 28px">Ticket Progress</div>
+                <br />
+                <br />
+                <canvas id="chart-area" width="100" height="100" />
+            </div>
+            <div class="col-md-5">
+                <div id="story-points" style="text-align:center" class="container-square">
+                    @{
+                        int numberOfStoryPoints = 0;
+                        foreach (Issue issue in Model.CurrentIssues)
+                        {
+                            numberOfStoryPoints += issue.Fields.StoryPoints.AsInt();
+                        }
+                        
+                    }
+                    <p style="font-size: 80px; text-align: center; margin: 0; margin-top: -15px; ">@completedStoryPoints</p><p style="font-size: 36px; text-align: center; margin-top: -15px">Points Completed</p>
+                    <div id="tickets" style="text-align:center" class="container-square">
+                        <p style="font-size: 80px; text-align: center; margin: 0; margin-top: -15px; ">@Model.NumberOfIssuesInEachColumn.Last().ToString()</p><p style="font-size: 36px; text-align: center; margin-top: -15px">Tickets Completed</p>
+                       
+                       
+                    </div>
+
+                </div>
+
+
+            </div>
+            </div>
+
+
+
+        <div id="right-statistics" class="col-md-8" style=" padding-bottom: 1000px; margin-bottom: -1000px;">
+
+            <div id="horizontal-chart" class="container-square">
+                <div style="font-size:28px; color:#ffffff">Sprint Progress</div>
+                <div id="stackedchartdiv"></div>
+            </div>
+
+            <div style="margin-top:15px; ">
+               <table style="width:100%">
+                   <tr>
+                       <td class="container-square col-md-3" style="color:#ffffff"><p style="font-size: 100px; text-align: center; margin: 0; margin-top: -15px; ">@Model.sprintDetails.daysRemaining</p><p style="font-size: 36px; text-align: center; margin-top: -15px; ">Days Remaining</p></td>
+                       <td style="width:10px;"></td>
+            @{
+                completedStoryPoints = 0;
+                foreach (Issue issue in Model.CurrentIssues)
+                {
+                    if (Model.ColumnNames.Last().statusIds.Contains(issue.Fields.Status.Id.ToString()))
+                    {
+                        completedStoryPoints += Convert.ToInt32(issue.Fields.StoryPoints);
+
+                    }
+
+                }
+                 int remainingPoints = totalStoryPoints  -completedStoryPoints;
+
+                 int velocityNeeded = remainingPoints / @Model.sprintDetails.daysRemaining;
+ 
+            }
+                       <td class="container-square col-md-3" style="color:#ffffff"><p style="font-size: 100px; text-align: center; margin: 0; margin-top: -15px; ">@remainingPoints</p><p style="font-size: 36px; text-align: center; margin-top: -15px">Points Remaining</p></td>
+                                            <td style="width:10px;"></td>
+                       <td class="container-square col-md-3" style="color:#ffffff"><p style="font-size: 100px; text-align: center; margin: 0; margin-top: -15px; ">@velocityNeeded</p><p style="font-size: 36px; text-align: center; margin-top: -15px">Pts/day Needed</p></td>
+                   </tr>
+               </table>
+                
+            </div>
+
+
+        </div>
+
+        </div>
+       
+    
+    
+
+   
+
+
+
+
+
+
+<script src="~/Scripts/stackedchart.js"></script>
+
